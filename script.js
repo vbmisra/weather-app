@@ -1,12 +1,12 @@
 // Global variables
-var searchHistory = [];
-var weatherApiRootUrl = 'https://api.openweathermap.org';
-var weatherApiKey = 'd91f911bcf2c0f925fb6535547a5ddc9';
+var searchHist = [];
+var rootUrl = 'https://api.openweathermap.org';
+var apiKey = 'd91f911bcf2c0f925fb6535547a5ddc9';
 
 // DOM element references
-var searchForm = document.querySelector('#search-form');
-var searchInput = document.querySelector('#search-input');
-var todayContainer = document.querySelector('#today');
+var searchFormEl = document.querySelector('#search-form');
+var searchEl = document.querySelector('#search-input');
+var todayEl = document.querySelector('#today');
 var forecastContainer = document.querySelector('#forecast');
 var searchHistoryContainer = document.querySelector('#history');
 
@@ -19,15 +19,15 @@ function renderSearchHistory() {
   searchHistoryContainer.innerHTML = '';
 
   // Start at end of history array and count down to show the most recent at the top.
-  for (var i = searchHistory.length - 1; i >= 0; i--) {
+  for (var i = searchHist.length - 1; i >= 0; i--) {
     var btn = document.createElement('button');
     btn.setAttribute('type', 'button');
     btn.setAttribute('aria-controls', 'today forecast');
     btn.classList.add('history-btn', 'btn-history');
 
     // `data-search` allows access to city name when click handler is invoked
-    btn.setAttribute('data-search', searchHistory[i]);
-    btn.textContent = searchHistory[i];
+    btn.setAttribute('data-search', searchHist[i]);
+    btn.textContent = searchHist[i];
     searchHistoryContainer.append(btn);
   }
 }
@@ -35,12 +35,12 @@ function renderSearchHistory() {
 // Function to update history in local storage then updates displayed history.
 function appendToHistory(search) {
   // If there is no search term return the function
-  if (searchHistory.indexOf(search) !== -1) {
+  if (searchHist.indexOf(search) !== -1) {
     return;
   }
-  searchHistory.push(search);
+  searchHist.push(search);
 
-  localStorage.setItem('search-history', JSON.stringify(searchHistory));
+  localStorage.setItem('search-history', JSON.stringify(searchHist));
   renderSearchHistory();
 }
 
@@ -48,7 +48,7 @@ function appendToHistory(search) {
 function initSearchHistory() {
   var storedHistory = localStorage.getItem('search-history');
   if (storedHistory) {
-    searchHistory = JSON.parse(storedHistory);
+    searchHist = JSON.parse(storedHistory);
   }
   renderSearchHistory();
 }
@@ -109,8 +109,8 @@ function renderCurrentWeather(city, weather, timezone) {
   uvEl.append(uviBadge);
   cardBody.append(uvEl);
 
-  todayContainer.innerHTML = '';
-  todayContainer.append(card);
+  todayEl.innerHTML = '';
+  todayEl.append(card);
 }
 
 // Function to display a forecast card given an object from open weather api
@@ -195,7 +195,7 @@ function fetchWeather(location) {
   var { lat } = location;
   var { lon } = location;
   var city = location.name;
-  var apiUrl = `${weatherApiRootUrl}/data/2.5/onecall?lat=${lat}&lon=${lon}&units=imperial&exclude=minutely,hourly&appid=${weatherApiKey}`;
+  var apiUrl = `${rootUrl}/data/2.5/onecall?lat=${lat}&lon=${lon}&units=imperial&exclude=minutely,hourly&appid=${apiKey}`;
 
   fetch(apiUrl)
     .then(function (res) {
@@ -210,7 +210,7 @@ function fetchWeather(location) {
 }
 
 function fetchCoords(search) {
-  var apiUrl = `${weatherApiRootUrl}/geo/1.0/direct?q=${search}&limit=5&appid=${weatherApiKey}`;
+  var apiUrl = `${rootUrl}/geo/1.0/direct?q=${search}&limit=5&appid=${apiKey}`;
 
   fetch(apiUrl)
     .then(function (res) {
@@ -231,14 +231,14 @@ function fetchCoords(search) {
 
 function handleSearchFormSubmit(e) {
   // Don't continue if there is nothing in the search form
-  if (!searchInput.value) {
+  if (!searchEl.value) {
     return;
   }
 
   e.preventDefault();
-  var search = searchInput.value.trim();
+  var search = searchEl.value.trim();
   fetchCoords(search);
-  searchInput.value = '';
+  searchEl.value = '';
 }
 
 function handleSearchHistoryClick(e) {
@@ -253,5 +253,5 @@ function handleSearchHistoryClick(e) {
 }
 
 initSearchHistory();
-searchForm.addEventListener('submit', handleSearchFormSubmit);
+searchFormEl.addEventListener('submit', handleSearchFormSubmit);
 searchHistoryContainer.addEventListener('click', handleSearchHistoryClick);
